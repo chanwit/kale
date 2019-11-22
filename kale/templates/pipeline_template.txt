@@ -37,6 +37,7 @@ def auto_generated_pipeline():
     {% set mountpoint = vol['mount_point'] %}
     {% set pvc_size = vol['size']|default ('') + vol['size_type']|default ('') %}
     {% set annotation = (vol['annotation']|default ('')).split(':', 1) %}
+
     {% if vol['type'] == 'pv' %}
 
     pvc{{ loop.index }}  = k8s_client.V1PersistentVolumeClaim(
@@ -47,12 +48,12 @@ def auto_generated_pipeline():
         ),
         spec=k8s_client.V1PersistentVolumeClaimSpec(
             volume_name="{{ name }}",
-            access_modes=['ReadWriteOnce'],
+            access_modes=['ReadWriteMany'],
             resources=k8s_client.V1ResourceRequirements(
-                requests={"storage": {{ pvc_size }}}
+                requests={"storage": "{{ pvc_size }}"}
             )
         )
-    )                                                              
+    )
 
     vop{{ loop.index }} = dsl.VolumeOp(
         name="pvc-data{{ loop.index }}",
@@ -61,7 +62,8 @@ def auto_generated_pipeline():
 
     {% elif vol['type'] == 'pvc' %}
 
-    vop{{ loop.index }} = dsl.PipelineVolume(pvc='{{ name }}')
+    volume = dsl.PipelineVolume(name='{{ name }}-vol', pvc='{{ name }}')
+    vop{{ loop.index }} = type('',(object,), {"volume": volume})()
 
     {% elif vol['type'] == 'new_pvc' %}
 
