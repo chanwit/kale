@@ -53,7 +53,7 @@ def auto_generated_pipeline({{ pipeline_arguments }}):
                 requests={"storage": {{ pvc_size }}}
             )
         )
-    )                                                              
+    )
 
     vop{{ loop.index }} = dsl.VolumeOp(
         name="pvc-data{{ loop.index }}",
@@ -86,7 +86,7 @@ def auto_generated_pipeline({{ pipeline_arguments }}):
     {{ name }}_task = {{ name }}_op({{ pipeline_arguments_names }})\
                             .add_pvolumes(pvolumes_dict)\
                             .after({{ block_function_prevs[ name ]|join(', ') }})
-    {{ name }}_task.container.working_dir = "{{ working_dir }}"
+    # {{ name }}_task.container.working_dir = "{{ working_dir }}"
 
     {% endfor %}
 
